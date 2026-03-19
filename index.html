@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- PWA META TAGS START -->
+<meta name="theme-color" content="#003366">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ренессанс Кредит">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<!-- PWA META TAGS END -->
+<title>Ренессанс Кредит - Система Приказов</title>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+body {
+background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+min-height: 100vh;
+padding: 20px;
+color: #333;
+}
+.container {
+max-width: 1200px;
+margin: 0 auto;
+background: white;
+border-radius: 15px;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+overflow: hidden;
+}
+header {
+background: linear-gradient(135deg, #003366, #0055a4);
+color: white;
+padding: 30px;
+text-align: center;
+position: relative;
+}
+header h1 {
+font-size: 2.5em;
+margin-bottom: 10px;
+text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+header p {
+font-size: 1.2em;
+opacity: 0.9;
+}
+.logo {
+position: absolute;
+top: 20px;
+left: 20px;
+width: 100px;
+height: 100px;
+background: white;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: bold;
+font-size: 24px;
+color: #0055a4;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+.main-content {
+padding: 40px;
+}
+.search-section {
+background: #f8f9fa;
+padding: 30px;
+border-radius: 10px;
+margin-bottom: 30px;
+box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.search-section h2 {
+color: #0055a4;
+margin-bottom: 20px;
+text-align: center;
+}
+.search-form {
+display: flex;
+gap: 15px;
+justify-content: center;
+align-items: center;
+}
+.search-form input {
+padding: 12px 20px;
+border: 2px solid #0055a4;
+border-radius: 8px;
+font-size: 16px;
+width: 300px;
+transition: all 0.3s;
+}
+.search-form input:focus {
+outline: none;
+border-color: #003366;
+box-shadow: 0 0 10px rgba(0, 85, 164, 0.3);
+}
+.btn {
+padding: 12px 30px;
+background: linear-gradient(135deg, #0055a4, #003366);
+color: white;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+font-size: 16px;
+font-weight: 600;
+transition: all 0.3s;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+.btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 5px 15px rgba(0, 85, 164, 0.4);
+}
+.btn:active {
+transform: translateY(0);
+}
+.btn-success {
+background: linear-gradient(135deg, #28a745, #218838);
+}
+.btn-danger {
+background: linear-gradient(135deg, #dc3545, #c82333);
+}
+.btn-warning {
+background: linear-gradient(135deg, #ffc107, #e0a800);
+}
+.btn-secondary {
+background: linear-gradient(135deg, #6c757d, #5a6268);
+}
+.btn-info {
+background: linear-gradient(135deg, #17a2b8, #138496);
+}
+.employee-info {
+background: white;
+padding: 25px;
+border-radius: 10px;
+margin-top: 20px;
+border-left: 5px solid #0055a4;
+box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.employee-info h3 {
+color: #0055a4;
+margin-bottom: 15px;
+font-size: 24px;
+}
+.orders-list {
+margin-top: 20px;
+}
+.order-item {
+background: #f8f9fa;
+padding: 15px;
+margin-bottom: 10px;
+border-radius: 8px;
+border-left: 4px solid #0055a4;
+cursor: pointer;
+transition: all 0.3s;
+}
+.order-item:hover {
+background: #e9ecef;
+transform: translateX(5px);
+}
+.order-item .order-number {
+font-weight: bold;
+color: #0055a4;
+font-size: 18px;
+display: block;
+margin-bottom: 5px;
+}
+.order-item .order-title {
+color: #555;
+font-size: 14px;
+margin-bottom: 8px;
+font-style: italic;
+}
+.order-item .order-date {
+color: #888;
+font-size: 12px;
+margin-bottom: 10px;
+}
+.order-item .download-btn {
+background: linear-gradient(135deg, #28a745, #218838);
+color: white;
+border: none;
+padding: 8px 15px;
+border-radius: 5px;
+cursor: pointer;
+font-size: 14px;
+margin-right: 8px;
+}
+.order-item .download-btn:hover {
+background: linear-gradient(135deg, #218838, #1e7e34);
+}
+.order-item .view-btn {
+background: linear-gradient(135deg, #0055a4, #003366);
+color: white;
+border: none;
+padding: 8px 15px;
+border-radius: 5px;
+cursor: pointer;
+font-size: 14px;
+}
+.order-item .view-btn:hover {
+background: linear-gradient(135deg, #003366, #002244);
+}
+.admin-panel {
+display: none;
+background: #f8f9fa;
+padding: 30px;
+border-radius: 10px;
+margin-top: 20px;
+box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.admin-panel h2 {
+color: #0055a4;
+margin-bottom: 20px;
+text-align: center;
+}
+.admin-form {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 20px;
+}
+.form-group {
+margin-bottom: 20px;
+}
+.form-group label {
+display: block;
+margin-bottom: 8px;
+color: #0055a4;
+font-weight: 600;
+}
+.form-group input,
+.form-group textarea,
+.form-group select {
+width: 100%;
+padding: 12px;
+border: 2px solid #0055a4;
+border-radius: 8px;
+font-size: 16px;
+transition: all 0.3s;
+}
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+outline: none;
+border-color: #003366;
+box-shadow: 0 0 10px rgba(0, 85, 164, 0.3);
+}
+.form-group textarea {
+resize: vertical;
+min-height: 100px;
+}
+.form-group input[type="file"] {
+padding: 3px;
+border: 2px dashed #0055a4;
+background: #fff;
+}
+.form-group input[type="file"]:hover {
+border-color: #003366;
+background: #f0f8ff;
+}
+.full-width {
+grid-column: span 2;
+}
+.half-width {
+grid-column: span 1;
+}
+.modal {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.7);
+z-index: 1000;
+justify-content: center;
+align-items: center;
+}
+.modal-content {
+background: white;
+padding: 40px;
+border-radius: 15px;
+max-width: 500px;
+width: 90%;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+.modal h3 {
+color: #0055a4;
+margin-bottom: 20px;
+text-align: center;
+}
+.modal input {
+width: 100%;
+padding: 12px;
+margin-bottom: 20px;
+border: 2px solid #0055a4;
+border-radius: 8px;
+font-size: 16px;
+}
+.modal-buttons {
+display: flex;
+gap: 15px;
+justify-content: center;
+margin-top: 20px;
+}
+.success-message {
+background: #d4edda;
+color: #155724;
+padding: 15px;
+border-radius: 8px;
+margin-top: 20px;
+text-align: center;
+display: none;
+}
+.error-message {
+background: #f8d7da;
+color: #721c24;
+padding: 15px;
+border-radius: 8px;
+margin-top: 20px;
+text-align: center;
+display: none;
+}
+.loading {
+display: inline-block;
+width: 20px;
+height: 20px;
+border: 3px solid rgba(0, 85, 164, 0.3);
+border-radius: 50%;
+border-top-color: #0055a4;
+animation: spin 1s linear infinite;
+margin-right: 10px;
+}
+@keyframes spin {
+to { transform: rotate(360deg); }
+}
+.file-info {
+background: #e7f3ff;
+padding: 10px;
+border-radius: 5px;
+margin-top: 10px;
+font-size: 14px;
+color: #0055a4;
+}
+.file-preview {
+max-width: 100%;
+max-height: 200px;
+margin-top: 10px;
+border: 1px solid #ddd;
+border-radius: 5px;
+display: none;
+}
+footer {
+background: #003366;
+color: white;
+text-align: center;
+padding: 20px;
+margin-top: 30px;
+}
+.status-indicator {
+display: inline-block;
+width: 12px;
+height: 12px;
+background: #28a745;
+border-radius: 50%;
+margin-right: 8px;
+vertical-align: middle;
+}
+.stats-panel {
+background: linear-gradient(135deg, #0055a4, #003366);
+color: white;
+padding: 20px;
+border-radius: 10px;
+margin-bottom: 20px;
+text-align: center;
+}
+.stats-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+gap: 15px;
+margin-top: 15px;
+}
+.stat-item {
+background: rgba(255, 255, 255, 0.1);
+padding: 15px;
+border-radius: 8px;
+}
+.stat-value {
+font-size: 2em;
+font-weight: bold;
+margin-bottom: 5px;
+}
+.stat-label {
+font-size: 0.9em;
+opacity: 0.9;
+}
+.file-type-icon {
+display: inline-block;
+width: 24px;
+height: 24px;
+background: #0055a4;
+color: white;
+border-radius: 4px;
+text-align: center;
+line-height: 24px;
+font-size: 12px;
+margin-right: 8px;
+vertical-align: middle;
+}
+/* Состояние сайта */
+.system-status {
+background: white;
+padding: 25px;
+border-radius: 10px;
+margin-bottom: 20px;
+box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.system-status h3 {
+color: #0055a4;
+margin-bottom: 15px;
+font-size: 20px;
+}
+.status-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+gap: 15px;
+}
+.status-item {
+padding: 15px;
+border-radius: 8px;
+background: #f8f9fa;
+}
+.status-item.online {
+border-left: 4px solid #28a745;
+}
+.status-item.offline {
+border-left: 4px solid #dc3545;
+}
+.status-item.warning {
+border-left: 4px solid #ffc107;
+}
+.status-label {
+font-weight: 600;
+color: #555;
+margin-bottom: 5px;
+font-size: 14px;
+}
+.status-value {
+font-size: 18px;
+font-weight: bold;
+}
+.status-online {
+color: #28a745;
+}
+.status-offline {
+color: #dc3545;
+}
+.status-warning {
+color: #ffc107;
+}
+/* История приказов */
+.history-panel {
+background: white;
+padding: 25px;
+border-radius: 10px;
+margin-top: 20px;
+box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.history-panel h3 {
+color: #0055a4;
+margin-bottom: 15px;
+font-size: 20px;
+}
+.history-item {
+background: #f8f9fa;
+padding: 15px;
+margin-bottom: 10px;
+border-radius: 8px;
+border-left: 4px solid #0055a4;
+}
+.history-item .history-time {
+font-size: 12px;
+color: #888;
+margin-bottom: 5px;
+}
+.history-item .history-order {
+font-weight: bold;
+color: #0055a4;
+margin-bottom: 3px;
+}
+.history-item .history-employee {
+color: #555;
+font-size: 14px;
+}
+.history-item .history-title {
+color: #666;
+font-size: 13px;
+font-style: italic;
+}
+.tabs {
+display: flex;
+margin-bottom: 20px;
+border-bottom: 2px solid #0055a4;
+}
+.tab-btn {
+padding: 12px 25px;
+background: none;
+border: none;
+cursor: pointer;
+font-size: 16px;
+font-weight: 600;
+color: #666;
+transition: all 0.3s;
+border-bottom: 3px solid transparent;
+}
+.tab-btn:hover {
+color: #0055a4;
+}
+.tab-btn.active {
+color: #0055a4;
+border-bottom: 3px solid #0055a4;
+}
+.tab-content {
+display: none;
+}
+.tab-content.active {
+display: block;
+}
+/* Ошибки системы */
+.errors-panel {
+background: #f8d7da;
+padding: 20px;
+border-radius: 8px;
+margin-top: 15px;
+border-left: 4px solid #dc3545;
+}
+.errors-panel h4 {
+color: #721c24;
+margin-bottom: 10px;
+font-size: 16px;
+}
+.error-item {
+background: white;
+padding: 10px;
+margin-bottom: 8px;
+border-radius: 5px;
+font-size: 13px;
+color: #721c24;
+}
+.error-time {
+font-weight: bold;
+margin-right: 10px;
+}
+@media (max-width: 768px) {
+.admin-form {
+grid-template-columns: 1fr;
+}
+.search-form {
+flex-direction: column;
+}
+.search-form input {
+width: 100%;
+}
+header h1 {
+font-size: 2em;
+}
+.main-content {
+padding: 20px;
+}
+.stats-grid,
+.status-grid {
+grid-template-columns: 1fr;
+}
+.tabs {
+flex-direction: column;
+}
+.tab-btn {
+width: 100%;
+text-align: left;
+}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<div class="logo">RK</div>
+<h1>Ренессанс Кредит</h1>
+<p>Система управления приказами</p>
+</header>
+<div class="main-content">
+<div class="stats-panel">
+<h2>Статистика системы</h2>
+<div class="stats-grid">
+<div class="stat-item">
+<div class="stat-value" id="totalOrders">0</div>
+<div class="stat-label">Всего приказов</div>
+</div>
+<div class="stat-item">
+<div class="stat-value" id="totalEmployees">0</div>
+<div class="stat-label">Сотрудников</div>
+</div>
+<div class="stat-item">
+<div class="stat-value" id="recentOrders">0</div>
+<div class="stat-label">За сегодня</div>
+</div>
+</div>
+</div>
+<div class="search-section">
+<h2>Поиск приказа</h2>
+<div class="search-form">
+<input type="text" id="orderNumber" placeholder="Введите номер приказа" onkeypress="handleKeyPress(event)">
+<button class="btn" onclick="searchOrder()">Найти</button>
+</div>
+<div id="employeeInfo" class="employee-info" style="display: none;">
+<h3 id="employeeNameDisplay"></h3>
+<div id="loadingMessage" style="text-align: center; padding: 20px; display: none;">
+<div class="loading"></div>
+<p>Поиск приказа...</p>
+</div>
+<div id="ordersList" class="orders-list"></div>
+</div>
+</div>
+<div id="adminPanel" class="admin-panel">
+<h2>Админ панель</h2>
+<div class="tabs">
+<button class="tab-btn active" onclick="switchTab('add')">Добавить приказ</button>
+<button class="tab-btn" onclick="switchTab('status')">Состояние сайта</button>
+<button class="tab-btn" onclick="switchTab('history')">История приказов</button>
+</div>
+<!-- Добавить приказ -->
+<div id="tab-add" class="tab-content active">
+<form id="adminForm" onsubmit="return addOrder(event)">
+<div class="admin-form">
+<div class="form-group half-width">
+<label for="adminOrderNumber">Номер приказа:</label>
+<input type="text" id="adminOrderNumber" required placeholder="Например: 123-К">
+</div>
+<div class="form-group half-width">
+<label for="employeeFIO">ФИО работника:</label>
+<input type="text" id="employeeFIO" required placeholder="Иванов Иван Иванович">
+</div>
+<div class="form-group full-width">
+<label for="orderTitle">Название приказа:</label>
+<input type="text" id="orderTitle" required placeholder="О приеме на работу, о переводе и т.д.">
+</div>
+<div class="form-group full-width">
+<label for="orderFile">Файл приказа (PDF, JPG, PNG до 5 МБ):</label>
+<input type="file" id="orderFile" accept=".pdf,.jpg,.jpeg,.png" required onchange="previewFile(this)">
+<div id="filePreviewInfo" class="file-info" style="display: none;"></div>
+<img id="filePreviewImage" class="file-preview" src="" alt="Предпросмотр">
+</div>
+<div class="form-group full-width">
+<button type="submit" class="btn btn-success" id="submitBtn">
+<span id="loadingIcon" style="display: none;" class="loading"></span>
+<span id="submitBtnText">Добавить приказ</span>
+</button>
+</div>
+</div>
+</form>
+<div id="adminSuccess" class="success-message"></div>
+<div id="adminError" class="error-message"></div>
+</div>
+<!-- Состояние сайта -->
+<div id="tab-status" class="tab-content">
+<div class="system-status">
+<h3>Состояние системы</h3>
+<div class="status-grid">
+<div class="status-item online">
+<div class="status-label">Подключение к базе данных</div>
+<div class="status-value status-online" id="dbStatus">Подключено</div>
+</div>
+<div class="status-item online">
+<div class="status-label">Статус системы</div>
+<div class="status-value status-online" id="systemStatus">Работает</div>
+</div>
+<div class="status-item">
+<div class="status-label">Версия</div>
+<div class="status-value">1.0</div>
+</div>
+<div class="status-item">
+<div class="status-label">Последнее обновление</div>
+<div class="status-value" id="lastUpdate">-</div>
+</div>
+</div>
+</div>
+<div class="errors-panel">
+<h4>Журнал ошибок системы</h4>
+<div id="errorsList">
+<div class="error-item">Ошибок не обнаружено</div>
+</div>
+</div>
+</div>
+<!-- История приказов -->
+<div id="tab-history" class="tab-content">
+<div class="history-panel">
+<h3>История добавления приказов</h3>
+<div id="historyList">
+<p style="text-align: center; color: #888;">История пуста</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<footer>
+<p>© 2026 Ренессанс Кредит. Все права защищены.</p>
+<p><span class="status-indicator"></span>Система работает в штатном режиме</p>
+<p style="margin-top: 5px; font-size: 0.9em; opacity: 0.8;">Бесплатный тариф Firebase - работает без аутентификации</p>
+</footer>
+</div>
+<div id="authModal" class="modal">
+<div class="modal-content">
+<h3>Вход в админ панель</h3>
+<input type="password" id="adminPassword" placeholder="Введите пароль" onkeypress="handleAuthKeyPress(event)">
+<div class="modal-buttons">
+<button class="btn btn-success" onclick="authenticateAdmin()">Войти</button>
+<button class="btn btn-danger" onclick="closeAuthModal()">Отмена</button>
+</div>
+<div id="authError" class="error-message" style="margin-top: 15px;"></div>
+</div>
+</div>
+<div id="viewModal" class="modal">
+<div class="modal-content">
+<h3 id="viewOrderTitle"></h3>
+<div id="viewOrderContent" style="margin-top: 20px; text-align: center; max-height: 500px; overflow: auto;">
+<div id="pdfContainer" style="width: 100%; min-height: 400px;"></div>
+</div>
+<div class="modal-buttons">
+<button class="btn btn-success" onclick="downloadCurrentOrder()">Скачать</button>
+<button class="btn btn-secondary" onclick="closeViewModal()">Закрыть</button>
+</div>
+</div>
+</div>
+<script>
+// Инициализация Firebase (только база данных - без аутентификации!)
+const firebaseConfig = {
+databaseURL: "https://renessans-bank-3df94-default-rtdb.europe-west1.firebasedatabase.app/"
+};
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+// Глобальные переменные
+let isAdminAuthenticated = false;
+let currentOrderData = null;
+let systemErrors = [];
+let lastUpdateTimestamp = null;
+// Обработчик нажатия кнопки F2
+document.addEventListener('keydown', function(event) {
+if (event.key === 'F2' || event.key === 'f2') {
+event.preventDefault();
+showAuthModal();
+}
+});
+// Переключение вкладок
+function switchTab(tabName) {
+// Убрать активный класс со всех кнопок
+const tabBtns = document.querySelectorAll('.tab-btn');
+tabBtns.forEach(btn => btn.classList.remove('active'));
+// Добавить активный класс к нужной кнопке
+event.target.classList.add('active');
+// Скрыть все вкладки
+const tabContents = document.querySelectorAll('.tab-content');
+tabContents.forEach(content => content.classList.remove('active'));
+// Показать нужную вкладку
+document.getElementById('tab-' + tabName).classList.add('active');
+// Если переключились на историю или состояние - обновить данные
+if (tabName === 'history') {
+loadHistory();
+} else if (tabName === 'status') {
+updateSystemStatus();
+}
+}
+// Показать модальное окно авторизации
+function showAuthModal() {
+const authModal = document.getElementById('authModal');
+const adminPassword = document.getElementById('adminPassword');
+const authError = document.getElementById('authError');
+if (authModal && adminPassword && authError) {
+authModal.style.display = 'flex';
+adminPassword.focus();
+authError.style.display = 'none';
+}
+}
+// Закрыть модальное окно авторизации
+function closeAuthModal() {
+const authModal = document.getElementById('authModal');
+const adminPassword = document.getElementById('adminPassword');
+const authError = document.getElementById('authError');
+if (authModal && adminPassword && authError) {
+authModal.style.display = 'none';
+adminPassword.value = '';
+authError.style.display = 'none';
+}
+}
+// Обработчик нажатия Enter в поле пароля
+function handleAuthKeyPress(event) {
+if (event.key === 'Enter') {
+authenticateAdmin();
+}
+}
+// Аутентификация администратора
+function authenticateAdmin() {
+const adminPassword = document.getElementById('adminPassword');
+const authError = document.getElementById('authError');
+if (!adminPassword || !authError) {
+console.error('Элементы авторизации не найдены');
+addSystemError('Элементы авторизации не найдены');
+return;
+}
+const password = adminPassword.value;
+const correctPassword = '1265';
+if (password === correctPassword) {
+isAdminAuthenticated = true;
+const adminPanel = document.getElementById('adminPanel');
+if (adminPanel) {
+adminPanel.style.display = 'block';
+}
+closeAuthModal();
+showSuccessAdmin('Добро пожаловать в админ панель!');
+loadStatistics();
+updateSystemStatus();
+} else {
+authError.textContent = 'Неверный пароль!';
+authError.style.display = 'block';
+adminPassword.value = '';
+adminPassword.focus();
+addSystemError('Неверный пароль при входе в админ панель');
+}
+}
+// Предпросмотр файла
+function previewFile(input) {
+const filePreviewInfo = document.getElementById('filePreviewInfo');
+const filePreviewImage = document.getElementById('filePreviewImage');
+const file = input.files[0];
+if (file) {
+// Проверка размера файла (макс 5 МБ для бесплатного тарифа)
+if (file.size > 5 * 1024 * 1024) {
+showErrorAdmin('Файл слишком большой! Максимальный размер: 5 МБ');
+input.value = '';
+if (filePreviewInfo) filePreviewInfo.style.display = 'none';
+if (filePreviewImage) filePreviewImage.style.display = 'none';
+addSystemError('Попытка загрузки файла больше 5 МБ');
+return;
+}
+const fileSize = (file.size / 1024 / 1024).toFixed(2);
+const fileExtension = file.name.split('.').pop().toUpperCase();
+if (filePreviewInfo) {
+filePreviewInfo.innerHTML = `
+<strong>Выбран файл:</strong> ${file.name}<br>
+<strong>Тип:</strong> ${fileExtension}<br>
+<strong>Размер:</strong> ${fileSize} МБ
+`;
+filePreviewInfo.style.display = 'block';
+}
+// Предпросмотр изображения
+if (file.type.startsWith('image/')) {
+const reader = new FileReader();
+reader.onload = function(e) {
+if (filePreviewImage) {
+filePreviewImage.src = e.target.result;
+filePreviewImage.style.display = 'block';
+}
+};
+reader.readAsDataURL(file);
+} else {
+if (filePreviewImage) filePreviewImage.style.display = 'none';
+}
+} else {
+if (filePreviewInfo) filePreviewInfo.style.display = 'none';
+if (filePreviewImage) filePreviewImage.style.display = 'none';
+}
+}
+// Конвертация файла в Base64 (для бесплатного тарифа)
+function fileToBase64(file) {
+return new Promise((resolve, reject) => {
+const reader = new FileReader();
+reader.readAsDataURL(file);
+reader.onload = () => resolve(reader.result);
+reader.onerror = error => reject(error);
+});
+}
+// Поиск приказа
+function searchOrder() {
+const orderNumberInput = document.getElementById('orderNumber');
+if (!orderNumberInput) {
+console.error('Элемент #orderNumber не найден');
+addSystemError('Элемент #orderNumber не найден');
+return;
+}
+const orderNumber = orderNumberInput.value.trim();
+if (!orderNumber) {
+showError('Пожалуйста, введите номер приказа');
+return;
+}
+// Показать индикатор загрузки
+const employeeInfo = document.getElementById('employeeInfo');
+const loadingMessage = document.getElementById('loadingMessage');
+const ordersList = document.getElementById('ordersList');
+const employeeNameDisplay = document.getElementById('employeeNameDisplay');
+if (!employeeInfo || !loadingMessage || !ordersList || !employeeNameDisplay) {
+console.error('Не все элементы найдены');
+addSystemError('Не все элементы блока поиска найдены');
+return;
+}
+// Очистить список приказов
+ordersList.innerHTML = '';
+employeeNameDisplay.textContent = '';
+// Показать сообщение о загрузке
+loadingMessage.style.display = 'block';
+employeeInfo.style.display = 'block';
+// Поиск приказа в базе данных
+database.ref('orders').orderByChild('orderNumber').equalTo(orderNumber)
+.once('value')
+.then(snapshot => {
+if (loadingMessage) loadingMessage.style.display = 'none';
+if (snapshot.exists()) {
+const orders = snapshot.val();
+const orderKey = Object.keys(orders)[0];
+const orderData = orders[orderKey];
+employeeNameDisplay.textContent = orderData.employeeFIO;
+employeeInfo.style.display = 'block';
+// Получить все приказы этого сотрудника
+getAllOrdersByEmployee(orderData.employeeFIO);
+} else {
+showError('Приказ с таким номером не найден');
+addSystemError(`Приказ №${orderNumber} не найден`);
+}
+})
+.catch(error => {
+if (loadingMessage) loadingMessage.style.display = 'none';
+console.error('Ошибка при поиске приказа:', error);
+showError('Произошла ошибка при поиске приказа');
+addSystemError(`Ошибка поиска приказа: ${error.message}`);
+});
+}
+// Получить все приказы сотрудника
+function getAllOrdersByEmployee(employeeFIO) {
+const loadingMessage = document.getElementById('loadingMessage');
+if (loadingMessage) loadingMessage.style.display = 'block';
+database.ref('orders').orderByChild('employeeFIO').equalTo(employeeFIO)
+.once('value')
+.then(snapshot => {
+if (loadingMessage) loadingMessage.style.display = 'none';
+if (snapshot.exists()) {
+const orders = snapshot.val();
+displayEmployeeOrders(orders, employeeFIO);
+} else {
+showError('Не удалось загрузить приказы сотрудника');
+addSystemError(`Не удалось загрузить приказы для ${employeeFIO}`);
+}
+})
+.catch(error => {
+if (loadingMessage) loadingMessage.style.display = 'none';
+console.error('Ошибка при загрузке приказов:', error);
+showError('Произошла ошибка при загрузке приказов');
+addSystemError(`Ошибка загрузки приказов: ${error.message}`);
+});
+}
+// Отобразить приказы сотрудника
+function displayEmployeeOrders(orders, employeeFIO) {
+const ordersList = document.getElementById('ordersList');
+if (!ordersList) {
+console.error('Элемент #ordersList не найден');
+addSystemError('Элемент #ordersList не найден');
+return;
+}
+ordersList.innerHTML = '';
+Object.keys(orders).forEach(key => {
+const order = orders[key];
+const date = order.timestamp ? new Date(order.timestamp).toLocaleDateString('ru-RU') : 'Неизвестно';
+const orderItem = document.createElement('div');
+orderItem.className = 'order-item';
+orderItem.innerHTML = `
+<div class="order-number">Приказ №${order.orderNumber}</div>
+<div class="order-title">${order.orderTitle || 'Без названия'}</div>
+<div class="order-date">Дата: ${date}</div>
+<button class="download-btn" onclick="downloadOrder('${key}')">Скачать</button>
+<button class="view-btn" onclick="viewOrder('${key}')">Просмотреть</button>
+`;
+ordersList.appendChild(orderItem);
+});
+}
+// Скачать приказ (из базы данных)
+function downloadOrder(orderKey) {
+database.ref('orders/' + orderKey).once('value').then(snapshot => {
+if (snapshot.exists()) {
+const order = snapshot.val();
+if (!order.fileData) {
+showError('Файл приказа отсутствует');
+addSystemError(`Файл приказа ${orderKey} отсутствует`);
+return;
+}
+const byteCharacters = atob(order.fileData.split(',')[1]);
+const byteNumbers = new Array(byteCharacters.length);
+for (let i = 0; i < byteCharacters.length; i++) {
+byteNumbers[i] = byteCharacters.charCodeAt(i);
+}
+const byteArray = new Uint8Array(byteNumbers);
+const blob = new Blob([byteArray], {type: order.fileType});
+const link = document.createElement('a');
+link.href = URL.createObjectURL(blob);
+link.download = order.fileName || `Приказ_${order.orderNumber}.${order.fileExtension || 'pdf'}`;
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+URL.revokeObjectURL(link.href);
+} else {
+showError('Файл приказа не найден');
+addSystemError(`Файл приказа ${orderKey} не найден`);
+}
+}).catch(error => {
+console.error('Ошибка загрузки файла:', error);
+showError('Ошибка при скачивании файла');
+addSystemError(`Ошибка скачивания файла: ${error.message}`);
+});
+}
+// Просмотреть приказ
+function viewOrder(orderKey) {
+database.ref('orders/' + orderKey).once('value').then(snapshot => {
+if (snapshot.exists()) {
+currentOrderData = snapshot.val();
+const viewOrderTitle = document.getElementById('viewOrderTitle');
+const pdfContainer = document.getElementById('pdfContainer');
+if (!viewOrderTitle || !pdfContainer) {
+console.error('Элементы модального окна не найдены');
+addSystemError('Элементы модального окна просмотра не найдены');
+return;
+}
+viewOrderTitle.textContent = currentOrderData.orderTitle || `Приказ №${currentOrderData.orderNumber}`;
+const viewContent = document.getElementById('viewOrderContent');
+// Очистить контейнер
+pdfContainer.innerHTML = '';
+// Для изображений
+if (currentOrderData.fileType && currentOrderData.fileType.startsWith('image/')) {
+const img = document.createElement('img');
+img.src = currentOrderData.fileData;
+img.style.maxWidth = '100%';
+img.style.maxHeight = '450px';
+pdfContainer.appendChild(img);
+}
+// Для PDF - показать ссылку для скачивания
+else {
+pdfContainer.innerHTML = `
+<div style="padding: 20px; background: #f8f9fa; border-radius: 8px;">
+<p style="margin-bottom: 15px; font-size: 16px;">
+<strong>Тип файла:</strong> ${currentOrderData.fileExtension ? currentOrderData.fileExtension.toUpperCase() : 'PDF'}
+</p>
+<p style="margin-bottom: 15px; font-size: 16px;">
+<strong>Размер:</strong> ${(currentOrderData.fileSize / 1024 / 1024).toFixed(2)} МБ
+</p>
+<p style="margin-bottom: 20px; color: #6c757d; font-style: italic;">
+Для просмотра PDF файла нажмите кнопку "Скачать" и откройте файл в программе чтения PDF
+</p>
+<button class="btn btn-success" onclick="downloadCurrentOrder()">Скачать файл</button>
+</div>
+`;
+}
+const viewModal = document.getElementById('viewModal');
+if (viewModal) {
+viewModal.style.display = 'flex';
+}
+} else {
+showError('Приказ не найден');
+addSystemError(`Приказ ${orderKey} не найден`);
+}
+}).catch(error => {
+console.error('Ошибка загрузки приказа:', error);
+showError('Ошибка при загрузке приказа');
+addSystemError(`Ошибка загрузки приказа: ${error.message}`);
+});
+}
+// Скачать текущий приказ из модального окна
+function downloadCurrentOrder() {
+if (currentOrderData) {
+if (!currentOrderData.fileData) {
+showError('Файл отсутствует');
+addSystemError('Файл в модальном окне отсутствует');
+return;
+}
+const byteCharacters = atob(currentOrderData.fileData.split(',')[1]);
+const byteNumbers = new Array(byteCharacters.length);
+for (let i = 0; i < byteCharacters.length; i++) {
+byteNumbers[i] = byteCharacters.charCodeAt(i);
+}
+const byteArray = new Uint8Array(byteNumbers);
+const blob = new Blob([byteArray], {type: currentOrderData.fileType});
+const link = document.createElement('a');
+link.href = URL.createObjectURL(blob);
+link.download = currentOrderData.fileName || `Приказ_${currentOrderData.orderNumber}.${currentOrderData.fileExtension || 'pdf'}`;
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+URL.revokeObjectURL(link.href);
+}
+}
+// Закрыть модальное окно просмотра
+function closeViewModal() {
+const viewModal = document.getElementById('viewModal');
+if (viewModal) {
+viewModal.style.display = 'none';
+}
+currentOrderData = null;
+}
+// Добавить приказ (без Firebase Storage - только база данных)
+async function addOrder(event) {
+event.preventDefault();
+const adminOrderNumber = document.getElementById('adminOrderNumber');
+const employeeFIO = document.getElementById('employeeFIO');
+const orderTitle = document.getElementById('orderTitle');
+const orderFile = document.getElementById('orderFile');
+if (!adminOrderNumber || !employeeFIO || !orderTitle || !orderFile) {
+console.error('Не все элементы формы найдены');
+addSystemError('Не все элементы формы добавления найдены');
+return false;
+}
+const orderNumber = adminOrderNumber.value.trim();
+const employeeFIOValue = employeeFIO.value.trim();
+const orderTitleValue = orderTitle.value.trim();
+const file = orderFile.files[0];
+if (!orderNumber || !employeeFIOValue || !orderTitleValue) {
+showErrorAdmin('Пожалуйста, заполните все поля');
+addSystemError('Попытка добавления приказа с незаполненными полями');
+return false;
+}
+if (!file) {
+showErrorAdmin('Пожалуйста, выберите файл');
+addSystemError('Попытка добавления приказа без файла');
+return false;
+}
+// Проверка размера файла (макс 5 МБ для бесплатного тарифа)
+if (file.size > 5 * 1024 * 1024) {
+showErrorAdmin('Файл слишком большой! Максимальный размер: 5 МБ');
+addSystemError('Попытка загрузки файла больше 5 МБ');
+return false;
+}
+// Проверка типа файла
+const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+if (!allowedTypes.includes(file.type)) {
+showErrorAdmin('Неподдерживаемый тип файла. Разрешены: PDF, JPG, PNG');
+addSystemError(`Неподдерживаемый тип файла: ${file.type}`);
+return false;
+}
+// Показать индикатор загрузки
+const submitBtn = document.getElementById('submitBtn');
+const loadingIcon = document.getElementById('loadingIcon');
+const submitBtnText = document.getElementById('submitBtnText');
+if (submitBtn && loadingIcon && submitBtnText) {
+submitBtn.disabled = true;
+loadingIcon.style.display = 'inline-block';
+submitBtnText.textContent = 'Загрузка...';
+}
+try {
+// Конвертация файла в Base64
+const base64File = await fileToBase64(file);
+// Создать новый приказ в базе данных
+const newOrderRef = database.ref('orders').push();
+const timestamp = Date.now();
+const orderData = {
+orderNumber: orderNumber,
+employeeFIO: employeeFIOValue,
+orderTitle: orderTitleValue,
+fileData: base64File,
+fileName: file.name,
+fileSize: file.size,
+fileType: file.type,
+fileExtension: file.name.split('.').pop().toLowerCase(),
+timestamp: timestamp
+};
+await newOrderRef.set(orderData);
+// Добавить запись в историю
+addToHistory(orderNumber, employeeFIOValue, orderTitleValue, timestamp);
+showSuccessAdmin('Приказ успешно добавлен!');
+// Сбросить форму
+const adminForm = document.getElementById('adminForm');
+if (adminForm) {
+adminForm.reset();
+}
+// Скрыть предпросмотр
+const filePreviewInfo = document.getElementById('filePreviewInfo');
+const filePreviewImage = document.getElementById('filePreviewImage');
+if (filePreviewInfo) filePreviewInfo.style.display = 'none';
+if (filePreviewImage) filePreviewImage.style.display = 'none';
+// Восстановить кнопку
+if (submitBtn && loadingIcon && submitBtnText) {
+submitBtn.disabled = false;
+loadingIcon.style.display = 'none';
+submitBtnText.textContent = 'Добавить приказ';
+}
+loadStatistics();
+return false;
+} catch (error) {
+console.error('Ошибка при добавлении приказа:', error);
+showErrorAdmin('Ошибка при добавлении приказа: ' + error.message);
+addSystemError(`Ошибка добавления приказа: ${error.message}`);
+// Восстановить кнопку в случае ошибки
+if (submitBtn && loadingIcon && submitBtnText) {
+submitBtn.disabled = false;
+loadingIcon.style.display = 'none';
+submitBtnText.textContent = 'Добавить приказ';
+}
+return false;
+}
+}
+// Добавить запись в историю
+function addToHistory(orderNumber, employeeFIO, orderTitle, timestamp) {
+const historyRef = database.ref('history').push();
+const historyData = {
+orderNumber: orderNumber,
+employeeFIO: employeeFIO,
+orderTitle: orderTitle,
+timestamp: timestamp,
+admin: 'Администратор'
+};
+historyRef.set(historyData).catch(error => {
+console.error('Ошибка добавления в историю:', error);
+addSystemError(`Ошибка добавления в историю: ${error.message}`);
+});
+}
+// Загрузить историю
+function loadHistory() {
+const historyList = document.getElementById('historyList');
+if (!historyList) return;
+historyList.innerHTML = '<div style="text-align: center; padding: 20px;"><div class="loading"></div>Загрузка истории...</div>';
+database.ref('history').orderByChild('timestamp').limitToLast(50)
+.once('value')
+.then(snapshot => {
+if (snapshot.exists()) {
+const history = snapshot.val();
+let html = '';
+// Сортировка по убыванию времени
+const sortedKeys = Object.keys(history).sort((a, b) =>
+history[b].timestamp - history[a].timestamp
+);
+sortedKeys.forEach(key => {
+const item = history[key];
+const date = new Date(item.timestamp);
+const timeStr = date.toLocaleString('ru-RU');
+html += `
+<div class="history-item">
+<div class="history-time">${timeStr}</div>
+<div class="history-order">Приказ №${item.orderNumber}</div>
+<div class="history-employee">${item.employeeFIO}</div>
+<div class="history-title">${item.orderTitle}</div>
+</div>
+`;
+});
+historyList.innerHTML = html;
+} else {
+historyList.innerHTML = '<p style="text-align: center; color: #888;">История пуста</p>';
+}
+})
+.catch(error => {
+console.error('Ошибка загрузки истории:', error);
+historyList.innerHTML = '<p style="text-align: center; color: #dc3545;">Ошибка загрузки истории</p>';
+addSystemError(`Ошибка загрузки истории: ${error.message}`);
+});
+}
+// Обновить состояние системы
+function updateSystemStatus() {
+const dbStatus = document.getElementById('dbStatus');
+const systemStatus = document.getElementById('systemStatus');
+const lastUpdate = document.getElementById('lastUpdate');
+if (lastUpdate) {
+const now = new Date();
+lastUpdate.textContent = now.toLocaleString('ru-RU');
+}
+// Обновить список ошибок
+updateErrorsList();
+}
+// Добавить ошибку в систему
+function addSystemError(errorMessage) {
+const timestamp = Date.now();
+const errorObj = {
+message: errorMessage,
+timestamp: timestamp,
+time: new Date(timestamp).toLocaleString('ru-RU')
+};
+systemErrors.unshift(errorObj); // Добавить в начало массива
+// Ограничить количество ошибок (последние 50)
+if (systemErrors.length > 50) {
+systemErrors = systemErrors.slice(0, 50);
+}
+// Обновить отображение ошибок
+updateErrorsList();
+console.error('[SYSTEM ERROR]', errorMessage);
+}
+// Обновить список ошибок
+function updateErrorsList() {
+const errorsList = document.getElementById('errorsList');
+if (!errorsList) return;
+if (systemErrors.length === 0) {
+errorsList.innerHTML = '<div class="error-item">Ошибок не обнаружено</div>';
+return;
+}
+let html = '';
+systemErrors.forEach(error => {
+html += `
+<div class="error-item">
+<span class="error-time">${error.time}:</span> ${error.message}
+</div>
+`;
+});
+errorsList.innerHTML = html;
+}
+// Обработчик нажатия Enter в поле поиска
+function handleKeyPress(event) {
+if (event.key === 'Enter') {
+searchOrder();
+}
+}
+// Показать сообщение об ошибке
+function showError(message) {
+const employeeInfo = document.getElementById('employeeInfo');
+const ordersList = document.getElementById('ordersList');
+if (employeeInfo && ordersList) {
+ordersList.innerHTML = `<div class="error-message" style="display: block;">${message}</div>`;
+employeeInfo.style.display = 'block';
+}
+}
+// Показать сообщение об ошибке в админ панели
+function showErrorAdmin(message) {
+const adminError = document.getElementById('adminError');
+if (adminError) {
+adminError.textContent = message;
+adminError.style.display = 'block';
+setTimeout(() => {
+adminError.style.display = 'none';
+}, 5000);
+}
+}
+// Показать сообщение об успехе в админ панели
+function showSuccessAdmin(message) {
+const adminSuccess = document.getElementById('adminSuccess');
+if (adminSuccess) {
+adminSuccess.textContent = message;
+adminSuccess.style.display = 'block';
+setTimeout(() => {
+adminSuccess.style.display = 'none';
+}, 3000);
+}
+}
+// Загрузка статистики
+function loadStatistics() {
+// Общее количество приказов
+database.ref('orders').once('value').then(snapshot => {
+const totalOrders = document.getElementById('totalOrders');
+if (totalOrders) {
+totalOrders.textContent = snapshot.numChildren();
+}
+});
+// Количество уникальных сотрудников
+database.ref('orders').once('value').then(snapshot => {
+if (snapshot.exists()) {
+const orders = snapshot.val();
+const employees = new Set();
+Object.keys(orders).forEach(key => {
+employees.add(orders[key].employeeFIO);
+});
+const totalEmployees = document.getElementById('totalEmployees');
+if (totalEmployees) {
+totalEmployees.textContent = employees.size;
+}
+}
+});
+// Приказы за сегодня
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+const todayTimestamp = today.getTime();
+database.ref('orders').once('value').then(snapshot => {
+if (snapshot.exists()) {
+const orders = snapshot.val();
+let todayCount = 0;
+Object.keys(orders).forEach(key => {
+if (orders[key].timestamp && orders[key].timestamp >= todayTimestamp) {
+todayCount++;
+}
+});
+const recentOrders = document.getElementById('recentOrders');
+if (recentOrders) {
+recentOrders.textContent = todayCount;
+}
+}
+});
+}
+// Инициализация при загрузке страницы
+window.onload = function() {
+// Проверка подключения к базе данных
+database.ref('.info/connected').on('value', function(snapshot) {
+const isConnected = snapshot.val();
+const statusIndicator = document.querySelector('.status-indicator');
+const dbStatus = document.getElementById('dbStatus');
+if (statusIndicator) {
+if (isConnected) {
+statusIndicator.style.background = '#28a745';
+if (dbStatus) {
+dbStatus.textContent = 'Подключено';
+dbStatus.className = 'status-value status-online';
+}
+} else {
+statusIndicator.style.background = '#dc3545';
+if (dbStatus) {
+dbStatus.textContent = 'Отключено';
+dbStatus.className = 'status-value status-offline';
+}
+addSystemError('Потеряно подключение к базе данных');
+}
+}
+});
+// Загрузка статистики
+loadStatistics();
+// Обновление состояния каждые 30 секунд
+setInterval(updateSystemStatus, 30000);
+};
+
+// PWA SERVICE WORKER REGISTRATION START
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('Service Worker зарегистрирован:', reg))
+            .catch(err => console.log('Ошибка регистрации Service Worker:', err));
+    });
+}
+// PWA SERVICE WORKER REGISTRATION END
+</script>
+</body>
+</html>
