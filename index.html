@@ -58,6 +58,12 @@ font-weight: bold;
 font-size: 24px;
 color: #0055a4;
 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+cursor: pointer;
+transition: all 0.3s;
+}
+.logo:hover {
+transform: scale(1.05);
+box-shadow: 0 6px 12px rgba(0, 85, 164, 0.4);
 }
 .main-content {
 padding: 40px;
@@ -583,7 +589,7 @@ text-align: left;
 <body>
 <div class="container">
 <header>
-<div class="logo">RK</div>
+<div class="logo" onclick="showAuthModal()" title="Нажмите для входа в админ панель">RK</div>
 <h1>Ренессанс Кредит</h1>
 <p>Система управления приказами</p>
 </header>
@@ -743,37 +749,13 @@ let isAdminAuthenticated = false;
 let currentOrderData = null;
 let systemErrors = [];
 let lastUpdateTimestamp = null;
-
-// === ОБРАБОТЧИКИ КЛАВИШ ДЛЯ АДМИН ПАНЕЛИ ===
-// Обработчик F2 (оригинальный)
+// Обработчик нажатия кнопки F2
 document.addEventListener('keydown', function(event) {
-    if (event.key === 'F2' || event.key === 'f2') {
-        event.preventDefault();
-        showAuthModal();
-    }
+if (event.key === 'F2' || event.key === 'f2') {
+event.preventDefault();
+showAuthModal();
+}
 });
-
-// === НОВЫЙ: Обработчик Shift для админ панели ===
-let shiftTimer = null;
-
-document.addEventListener('keydown', function(event) {
-    // Shift срабатывает только если нажат ОДИН (без Ctrl, Alt, Meta)
-    if (event.key === 'Shift' && !event.ctrlKey && !event.altKey && !event.metaKey) {
-        shiftTimer = setTimeout(() => {
-            showAuthModal();
-        }, 150); // небольшая задержка, чтобы не мешать обычному вводу
-    }
-});
-
-document.addEventListener('keyup', function(event) {
-    // Если Shift отпущен быстро - отменяем открытие
-    if (event.key === 'Shift' && shiftTimer) {
-        clearTimeout(shiftTimer);
-        shiftTimer = null;
-    }
-});
-// === КОНЕЦ ОБРАБОТЧИКОВ АДМИН ПАНЕЛИ ===
-
 // Переключение вкладок
 function switchTab(tabName) {
 // Убрать активный класс со всех кнопок
