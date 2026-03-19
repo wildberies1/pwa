@@ -751,9 +751,9 @@ let isAdminAuthenticated = false;
 let currentOrderData = null;
 let systemErrors = [];
 let lastUpdateTimestamp = null;
-// Обработчик нажатия кнопки F2
+// Обработчик нажатия кнопки Shift
 document.addEventListener('keydown', function(event) {
-if (event.key === 'F2' || event.key === 'f2') {
+if (event.key === 'Shift' || event.key === 'shift') {
 event.preventDefault();
 showAuthModal();
 }
