@@ -3,14 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- PWA META TAGS START -->
-<meta name="theme-color" content="#003366">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Ренессанс Кредит">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
-<!-- PWA META TAGS END -->
 <title>Ренессанс Кредит - Система Приказов</title>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -751,30 +743,37 @@ let isAdminAuthenticated = false;
 let currentOrderData = null;
 let systemErrors = [];
 let lastUpdateTimestamp = null;
-// Обработчик нажатия кнопки F2
+
+// === ОБРАБОТЧИКИ КЛАВИШ ДЛЯ АДМИН ПАНЕЛИ ===
+// Обработчик F2 (оригинальный)
 document.addEventListener('keydown', function(event) {
-if (event.key === 'F2' || event.key === 'f2') {
-event.preventDefault();
-showAuthModal();
-}
+    if (event.key === 'F2' || event.key === 'f2') {
+        event.preventDefault();
+        showAuthModal();
+    }
 });
 
-// Обработчик нажатия кнопки Shift (для открытия админ панели)
+// === НОВЫЙ: Обработчик Shift для админ панели ===
 let shiftTimer = null;
+
 document.addEventListener('keydown', function(event) {
-if (event.key === 'Shift' && !event.ctrlKey && !event.altKey && !event.metaKey) {
-shiftTimer = setTimeout(() => {
-showAuthModal();
-}, 200);
-}
+    // Shift срабатывает только если нажат ОДИН (без Ctrl, Alt, Meta)
+    if (event.key === 'Shift' && !event.ctrlKey && !event.altKey && !event.metaKey) {
+        shiftTimer = setTimeout(() => {
+            showAuthModal();
+        }, 150); // небольшая задержка, чтобы не мешать обычному вводу
+    }
 });
 
 document.addEventListener('keyup', function(event) {
-if (event.key === 'Shift' && shiftTimer) {
-clearTimeout(shiftTimer);
-shiftTimer = null;
-}
+    // Если Shift отпущен быстро - отменяем открытие
+    if (event.key === 'Shift' && shiftTimer) {
+        clearTimeout(shiftTimer);
+        shiftTimer = null;
+    }
 });
+// === КОНЕЦ ОБРАБОТЧИКОВ АДМИН ПАНЕЛИ ===
+
 // Переключение вкладок
 function switchTab(tabName) {
 // Убрать активный класс со всех кнопок
@@ -1435,16 +1434,6 @@ loadStatistics();
 // Обновление состояния каждые 30 секунд
 setInterval(updateSystemStatus, 30000);
 };
-
-// PWA SERVICE WORKER REGISTRATION START
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('Service Worker зарегистрирован:', reg))
-            .catch(err => console.log('Ошибка регистрации Service Worker:', err));
-    });
-}
-// PWA SERVICE WORKER REGISTRATION END
 </script>
 </body>
 </html>
